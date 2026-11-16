@@ -1,4 +1,4 @@
-name: Static MVP verification
+name: Static MVP and D1 schema checks
 on:
   push:
   pull_request:
@@ -12,5 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify static entrypoint and security warnings
+      - name: Verify static entrypoint
         run: node tests/smoke.mjs
+      - name: Test SQL constraints in SQLite
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
