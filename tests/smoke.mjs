@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+const html=readFileSync('index.html','utf8');
+assert.match(html,/<html lang="fr">/);
+assert.match(html,/<meta name="viewport"/);
+assert.match(html,/localStorage/);
+assert.match(html,/Réinitialiser la démo/);
+assert.match(html,/warlike-/i);
+assert.ok(existsSync('migrations/0001_'+(html.includes('WARLIKE <span>ACADEMY')?'academy':'business')+'.sql'));
+assert.ok(existsSync('docs/INTEGRATION.md'));
+console.log('Smoke statique OK (ne remplace pas les tests navigateur et API).');
