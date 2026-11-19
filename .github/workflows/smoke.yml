@@ -13,6 +13,10 @@ jobs:
         with:
           node-version: '22'
       - name: Verify static entrypoint
-        run: node tests/smoke.mjs
+        run: |
+          node tests/smoke.mjs
+          node --check app.js
+          node --check model.js
+          node --test tests/model.test.mjs
       - name: Test SQL constraints in SQLite
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v

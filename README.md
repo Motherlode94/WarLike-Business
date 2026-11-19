@@ -1,37 +1,36 @@
 # WarLike Business
 
-MVP de gestion commerciale en navigateur, conçu pour une prévisualisation sur Cloudflare Pages.
+Gestion commerciale locale dans le navigateur : https://warlike-business.pages.dev/.
 
-## Fonctionnalités
+## Édition enrichie — novembre 2026
 
-- Tableau de bord : clients, devis, montants des factures encaissées / non payées.
-- Répertoire client avec validation de l'e-mail et protection contre la suppression d'un client référencé.
-- Création de devis avec montant HT strictement positif ; conversion en factures avec références locales uniques.
-- Marquage manuel de paiement reçu et impression d'un **document de démonstration**, sans valeur fiscale.
-- Persistance locale via `localStorage`, interface sombre responsive.
+- Répertoire clients avec recherche, contrôle des doublons d’email et suppression bloquée pour les clients liés à un document.
+- Devis de 1 à 40 lignes, descriptions, quantités entières et prix unitaires HT. Calcul en centimes entiers, total vérifié et limites de montant.
+- États manuels des devis : brouillon, envoyé, accepté, refusé. « Envoyé » est une indication personnelle, aucun email n’est envoyé.
+- Conversion unique d’un devis en facture de démonstration, échéance choisie et instantané des coordonnées du client et des lignes.
+- Historique des règlements manuels partiels, solde restant, rejet des montants excessifs et état de retard selon l’échéance.
+- Tableau de bord calculé sur les montants effectivement saisis, recherche et filtres par état.
+- Impression du document détaillé depuis la page, sans fenêtre surgissante. La commande d’impression du navigateur permet d’enregistrer un PDF local.
+- Sauvegarde/restauration JSON validée, export des factures CSV (protection des cellules pouvant être interprétées comme formules) et récupération des données brutes en cas de contenu illisible.
 
-## Démarrer
+Les données de l’ancienne démo sont migrées à la lecture sans changement de clé (`warlike-business-demo-v1`). Les écritures ne remplacent l’état en mémoire qu’après réussite du stockage. Une modification provenant d’un autre onglet bloque une écriture périmée et demande un rechargement. Un stockage illisible n’est pas écrasé automatiquement. L’import/remise à zéro exige une confirmation et remplace les données locales.
 
-Ouvrir `index.html` ou déployer comme site statique sur Cloudflare Pages (sans build, output directory `/`).
+## Exécuter et vérifier
 
-## Attention : pas encore un logiciel de facturation opérationnel
+Servir la racine du dépôt avec un serveur HTTP statique ou Cloudflare Pages, sans compilation. `index.html` charge `app.css`, `model.js` et `app.js` depuis la même origine. Pas de dépendance distante.
 
-Aucune donnée n'est envoyée au serveur. Le navigateur n'est pas un stockage fiable pour les données de gestion. Les références sont uniques **uniquement dans cette démo locale**, non garanties légalement. Pas de comptes, TVA, mentions obligatoires, e-invoicing, numérotation fiscale immuable, emails, règlement bancaire, PDF certifié ni sauvegardes distantes. Ne pas utiliser pour émettre des factures commerciales réelles.
+```sh
+node tests/smoke.mjs
+node --check app.js
+node --check model.js
+node --test tests/model.test.mjs
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
 
-## Suite de développement
+Essais navigateur réalisés : création d’un devis, conversion, règlement partiel et conservation du solde après rechargement. À vérifier sur les appareils cibles : impression réelle, import/export de fichiers et très gros répertoires.
 
-1. WarLike Keys : session et rôles serveur.
-2. WarLike Server (D1/R2) : tenants, contrôles d'accès par entreprise, journaux d'audit, sauvegardes.
-3. Cycle légal devis/contrat/facture, TVA selon juridiction, numérotation atomique et états immuables.
-4. Export PDF professionnel, e-facturation réglementaire, paiements via prestataire agréé.
-5. Tests CI, flux E2E et déploiement progressif.
+## Périmètre actuel
 
-## Vérification manuelle
+Données dans `localStorage`, non synchronisées. Les sauvegardes JSON contiennent des coordonnées et ne sont pas chiffrées. Aucun compte, rôle serveur, paiement bancaire, envoi d’email ou archivage distant. Les documents sont des **démonstrations sans valeur fiscale**, tous les montants restent HT et aucune TVA n’est calculée. Quantités entières seulement. Les références locales ne constituent pas une numérotation fiscale garantie.
 
-1. Ajouter un client, créer un devis et le convertir en facture.
-2. Marquer la facture payée ; vérifier les totaux.
-3. Recharger la page ; vérifier la persistance et les références.
-4. Tester suppression d'un client référencé et impression.
-5. Réinitialiser la démo ; constater la remise à zéro.
-
-Les changements initiaux sont proposés dans une PR ; `main` reste inchangée jusqu'à fusion.
+Les migrations SQL préparent une intégration future, elles ne sont pas appliquées automatiquement à une base de production. La connexion Keys/Server, les entreprises et l’émission de documents commerciaux opérationnels restent à réaliser selon [le plan d’intégration](docs/INTEGRATION.md).
